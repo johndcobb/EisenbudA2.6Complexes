@@ -53,3 +53,6 @@ restart
 --and we will let (-a,b) correspond to S^*_a \otimes \wedge^b F.
 
 L1 = (f,g,i)->(apply(i+1,j->{i-j,j}))
+L2 = (f,g,i)->(apply(f-g-i+1,j->{-j,g+i+j}))
+--Now C^i is built from L1 \epsilon L2 (with maps going right to left)
+
