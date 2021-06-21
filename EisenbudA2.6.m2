@@ -61,11 +61,8 @@ E = exteriorPower(2, F)
 E_0
 truncate({{3,0,0}},S)
 L1 = (f,g,i)->(apply(i+1,j->{i-j,j}))
-L2 = (f,g,i)->(apply(f-g-i+1,j->{-j,g+i+j}))
+L2 = (f,g,i)->(apply(i+1,j->{-j,f-i+j}))
 --Now C^i is built from L1 \epsilon L2 (with maps going right to left)
-
-L2(4,2,2)
--- L2 fails for this degree, why is that?
 
 abpairgens = method()
 abpairgens := (a,b,phi) -> (
