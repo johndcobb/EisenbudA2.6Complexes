@@ -59,8 +59,8 @@ L2 = (f,g,i)->(apply(f-g-i+1,j->{-j,f-i+j}))
 
 --3rd Attempt: Constructing C^{-1}, C^0, C^1, C^2, and C^3 explicitly in the 2x4 matrix case
 restart
---Function for rings that are Z-graded and maps of linear forms
 
+--Function for rings that are Z-graded and maps of linear forms
 ComplexesList1 = M -> (
     I := {-1,0,1,2,3};
     apply(I, i-> C_i = new ChainComplex);
@@ -136,8 +136,7 @@ ComplexesList2 = M -> (
     
     
     --Define modules for C^(-1)
-    --still need to do
-    apply(4, j-> C_(-1)#j = R^{(binomial(4,j+1)*binomial(1+j,j)):{j+1,j+1}});
+    apply(4, j-> C_(-1)#j = R^{(binomial(4,j+1)*binomial(1+j,j)):(-(j+1)*Columns)_0});
     C_(-1)#4 = 0;
     
     --Define maps for C^(-1)
@@ -163,9 +162,9 @@ ComplexesList2 = M -> (
     --Define modules for C^1
     --still need to do
     C_1#0 = R^2;
-    C_1#1 = R^{4:{1,1}};
-    C_1#2 = R^{4:{3,3}};
-    C_1#3 = R^{2:{4,4}};
+    C_1#1 = R^(-Columns);
+    C_1#2 = R^(-3*Columns);
+    C_1#3 = R^{2:(-4*Columns)_0};
     C_1#4 = 0;
     
     --Define maps for C^1
@@ -176,9 +175,9 @@ ComplexesList2 = M -> (
     --Define modules for C^2
     --still need to do
     C_2#0 = R^3;
-    C_2#1 = R^{8:{1,1}};
-    C_2#2 = R^{6:{2,2}};
-    C_2#3 = R^{1:{4,4}};
+    C_2#1 = R^{8:(-Columns)_0};
+    C_2#2 = R^{6:(-2*Columns)_0};
+    C_2#3 = R^{1:(-4*Columns)_0};
     C_2#4 = 0;
    	 
     --Define maps for C^2
@@ -188,7 +187,7 @@ ComplexesList2 = M -> (
     
     --Define modules for C^3
     --still need to do
-    apply(4, j-> C_3#j = R^{(binomial(4,j+1)*binomial(1+j,j)):{j+1,j+1}});
+    apply(4, j-> C_3#j = R^{(binomial(4,j+1)*binomial(1+j,j)):(-j*Columns)_0});
     C_3#4 = 0;
     
     --Define maps for C^3
@@ -211,4 +210,11 @@ apply(4,i-> HH_i C_0 ==0)
 apply(4,i-> HH_i C_1 ==0)
 apply(4,i-> HH_i C_2 ==0)
 apply(4,i-> HH_i C_3 ==0)
+
+
+--Test example for ComplexesList2
+R=ZZ/32003[x_0,x_1,y_0,y_1,Degrees=>{2:{1,0},2:{0,1}}]
+M=map(R^2,R^{4:{-1,-1}},matrix{{x_0*y_0,x_0*y_1,-x_0*y_0,0},{0,-x_1*y_1,x_1*y_0,x_1*y_1}})
+isHomogeneous M
+
 
