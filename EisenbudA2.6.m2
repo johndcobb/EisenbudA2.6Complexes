@@ -122,7 +122,8 @@ ComplexesList1 = M -> (
     return {C_(-1),C_0,C_1,C_2,C_3};)
 
 --Function for rings that are Multigraded
---This function is in progress! The goal is to get it to work for any homogeneous 2x4 map between multigraded rings.
+--This function works for any homogeneous 2x4 map between multigraded rings where all of the entries have the same degree.
+
 needsPackage "TensorComplexes"
 
 ComplexesList2 = M -> (
@@ -133,10 +134,10 @@ ComplexesList2 = M -> (
     
     Rows := degrees target M;
     Columns := degrees source M;
-    
+    deg := (rsort(Columns))_0;
     
     --Define modules for C^(-1)
-    apply(4, j-> C_(-1)#j = R^{(binomial(4,j+1)*binomial(1+j,j)):(-(j+1)*Columns)_0});
+    apply(4, j-> C_(-1)#j = R^{(binomial(4,j+1)*binomial(1+j,j)):-(j+1)*deg});
     C_(-1)#4 = 0;
     
     --Define maps for C^(-1)
@@ -146,12 +147,15 @@ ComplexesList2 = M -> (
     
     --Define modules for C^0
     C_0#0 = R^1;
-    Cmoddegs = apply({1,2,3},j->(
-	    if j==1 then apply(subsets(Columns,j+1),L-> (sum L-degree(M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0)))) else (
-	    flatten apply(multiSubsets(Rows,j-1),L'->(apply(subsets(Columns,j+1),L->(sum L-degree(M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0))+sum L')))))
-	    ));
+    C_0#1 = R^{6:-2*deg};
+    C_0#2 = R^{8:-3*deg};
+    C_0#3 = R^{3:-4*deg};
+    --Cmoddegs = apply({1,2,3},j->(
+	    --if j==1 then apply(subsets(Columns,j+1),L-> (sum L-degree(M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0)))) else (
+	   --flatten apply(multiSubsets(Rows,j-1),L'->(apply(subsets(Columns,j+1),L->(sum L-degree(M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0))+sum L')))))
+	    --));
     
-    apply({1,2,3}, j-> C_0#j = R^(Cmoddegs_(j-1)));
+    --apply({1,2,3}, j-> C_0#j = R^(Cmoddegs_(j-1)));
     C_0#4 = 0;
     
     --Define maps for C^0
@@ -164,7 +168,7 @@ ComplexesList2 = M -> (
     C_1#0 = R^2;
     C_1#1 = R^(-Columns);
     C_1#2 = R^(-3*Columns);
-    C_1#3 = R^{2:(-4*Columns)_0};
+    C_1#3 = R^{2:-4*deg};
     C_1#4 = 0;
     
     --Define maps for C^1
@@ -175,9 +179,9 @@ ComplexesList2 = M -> (
     --Define modules for C^2
     --still need to do
     C_2#0 = R^3;
-    C_2#1 = R^{8:(-Columns)_0};
-    C_2#2 = R^{6:(-2*Columns)_0};
-    C_2#3 = R^{1:(-4*Columns)_0};
+    C_2#1 = R^{8:-deg};
+    C_2#2 = R^{6:-2*deg};
+    C_2#3 = R^{1:-4*deg};
     C_2#4 = 0;
    	 
     --Define maps for C^2
@@ -187,7 +191,7 @@ ComplexesList2 = M -> (
     
     --Define modules for C^3
     --still need to do
-    apply(4, j-> C_3#j = R^{(binomial(4,j+1)*binomial(1+j,j)):(-j*Columns)_0});
+    apply(4, j-> C_3#j = R^{(binomial(4,j+1)*binomial(1+j,j)):-j*deg});
     C_3#4 = 0;
     
     --Define maps for C^3
@@ -212,9 +216,70 @@ apply(4,i-> HH_i C_2 ==0)
 apply(4,i-> HH_i C_3 ==0)
 
 
---Test example for ComplexesList2
+--Examples for ComplexesList2
+
+--Example where none of the complexes are virtual resolutions
 R=ZZ/32003[x_0,x_1,y_0,y_1,Degrees=>{2:{1,0},2:{0,1}}]
-M=map(R^2,R^{4:{-1,-1}},matrix{{x_0*y_0,x_0*y_1,-x_0*y_0,0},{0,-x_1*y_1,x_1*y_0,x_1*y_1}})
-isHomogeneous M
+phi=map(R^2,R^{4:{-1,-1}},matrix{{x_0*y_0,x_0*y_1,-x_0*y_0,0},{0,-x_1*y_1,x_1*y_0,x_1*y_1}})
+isHomogeneous phi
+ComplexesList2(phi)
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1))
+I=minors(2,phi)
+IB=saturate(I,B)
+needsPackage "VirtualResolutions"
+apply({-1,0,1,2,3},j-> isVirtual(B,C_(j)))
+--so all C^i are not virtual resolutions
+--we can also see this by looking at the depth condition
+needsPackage "Depth"
+depth(I,R)
+depth(IB,R)
+
+R=ZZ/32003[x_0,x_1,y_0,y_1,Degrees=>{2:{1,0},2:{0,1}}]
+phi=map(R^2,R^{4:{-2,-1}},matrix{{x_0^2*y_0,x_0^2*y_1,-x_0^2*y_1,0},{0,-x_1^2*y_1,x_1^2*y_0,x_1^2*y_1}})
+isHomogeneous phi
+ComplexesList2(phi)
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1))
+I=minors(2,phi)
+IB=saturate(I,B)
+needsPackage "VirtualResolutions"
+apply({-1,0,1,2,3},j-> isVirtual(B,C_(j)))
+--so all C^i are not virtual resolutions
+--we can also see this by looking at the depth condition
+needsPackage "Depth"
+depth(I,R)
+depth(IB,R)
+
+phi=map(R^2,R^{4:{-2,-1}},matrix{{x_0^2*y_1,x_0*x_1*y_0,x_1^2*y_1,0},{0,x_0^2*y_0,x_0*x_1*y_1,x_1^2*y_0}})
+isHomogeneous phi
+ComplexesList2(phi)
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1))
+I=minors(2,phi)
+IB=saturate(I,B)
+needsPackage "VirtualResolutions"
+apply({-1,0,1,2,3},j-> isVirtual(B,C_(j)))
+--so all C^i are not virtual resolutions
+--we can also see this by looking at the depth condition
+needsPackage "Depth"
+depth(I,R)
+depth(IB,R)
+
+R=ZZ/32003[x_0,x_1,y_0,y_1,z_0,z_1,Degrees=>{2:{1,0,0},2:{0,1,0},2:{0,0,1}}]
+phi=map(R^2,R^{4:{-1,-2,0}},matrix{{x_0*y_0^2,x_0*y_0*y_1,x_0*y_1^2,0},{0,x_1*y_0^2,x_1*y_0*y_1,x_1*y_1^2}})
+isHomogeneous phi
+ComplexesList2(phi)
+B=intersect(intersect(ideal(x_0,x_1),ideal(y_0,y_1)),ideal(z_0,z_1))
+I=minors(2,phi)
+IB=saturate(I,B)
+depth(I,R)
+depth(IB,R)
+en=eagonNorthcott(phi)
+en.dd
+(C_0).dd
 
 
+phi=map(R^2,R^{{-1,-2,0},{-2,0,-1},{0,-2,-1},{-1,0,-2}},matrix{{x_0*y_0^2,0,y_0*y_1*z_0,0},{0,x_0*x_1*z_1,0,x_1*z_1^2}})
+phi=map(R^2,R^{{-1,-2,0},{-2,0,-1},{0,-2,-1},{-1,0,-2}},matrix{{x_0*y_0^2,0,y_1^2*z_0,0},{0,x_1^2*z_1,0,x_1*z_1^2}})
+phi=map(R^2,R^{{-1,-2,0},{0,-1,-2},{-2,-1,0},{0,-2,-1}},matrix{{x_0*y_0^2,0,x_1^2*y_1,0},{0,y_0*z_0^2,0,y_1^2*z_1}})
+
+--Random matrices
+phi=map(R^2,R^{4:{-1,-2,-1}},matrix{{random({1,2,1},R),random({1,2,1},R),random({1,2,1},R),random({1,2,1},R)},{random({1,2,1},R),random({1,2,1},R),random({1,2,1},R),random({1,2,1},R)}})
