@@ -151,8 +151,8 @@ ComplexesList2 = M -> (
     C_0#2 = R^{8:-3*deg};
     C_0#3 = R^{3:-4*deg};
     --Cmoddegs = apply({1,2,3},j->(
-	    --if j==1 then apply(subsets(Columns,j+1),L-> (sum L)) else (
-	   --flatten apply(multiSubsets(Rows,j-1),L'->(apply(subsets(Columns,j+1),L->(sum L-sum L')))))
+	    --if j==1 then apply(subsets(Columns,j+1),L-> (sum L-degree(M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0)))) else (
+	   --flatten apply(multiSubsets(Rows,j-1),L'->(apply(subsets(Columns,j+1),L->(sum L-degree(M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0))+sum L')))))
 	    --));
     
     --apply({1,2,3}, j-> C_0#j = R^(Cmoddegs_(j-1)));
@@ -201,7 +201,9 @@ ComplexesList2 = M -> (
     
     return {C_(-1),C_0,C_1,C_2,C_3};)
 
+
 -- This function is trying to correct a mistake above about calculating the degrees.
+-- It should now work for any homogeneous 2x4 map.
 
 ComplexesList3 = M -> (
     I := {-1,0,1,2,3};
@@ -214,10 +216,10 @@ ComplexesList3 = M -> (
     
     --Define modules for C^(-1)
     
-    C_(-1)#0 = R^(apply(subsets(Columns,1), L -> sum L));
+    C_(-1)#0 = R^(apply(subsets(Columns,1), L -> -sum L));
 
     Cmoddegs := apply({1,2,3}, j -> ( flatten apply(multiSubsets(Rows, j), L' -> (apply(subsets(Columns, j+1), L-> sum L - sum L')))));
-    apply({1,2,3}, j-> C_(-1)#j = R^(Cmoddegs_(j-1)));
+    apply({1,2,3}, j-> C_(-1)#j = R^(-Cmoddegs_(j-1)));
    
     C_(-1)#4 = 0;
     
@@ -227,11 +229,14 @@ ComplexesList3 = M -> (
     C_(-1).dd#3 = map(C_(-1)_2,C_(-1)_3,matrix{{M_(0,2), M_(0,3), 0,0}, {-M_(0,1), 0, M_(0,3),0}, {0, -M_(0,1), -M_(0,2), 0}, {M_(0,0),0,0, M_(0,3)}, {0, M_(0,0), 0 , M_(0,2)} ,{0,0, M_(0,0), M_(0,1)} ,{M_(1,2), M_(1,3),0,0} ,{-M_(1,1), 0, M_(1,3),0} , {0,-M_(1,1), -M_(1,2), 0} ,{M_(1,0),0,0, M_(1,3)}, {0, M_(1,0), 0, M_(1,2)} ,{0,0, M_(1,0), M_(1,1)}});
     
     --Define modules for C^0
-    C_0#0 = R^{sum Rows};
-    C_0#1 = R^(apply(subsets(Columns,2),L-> sum L));
-    Cmoddegs := apply({2,3},j-> flatten apply(multiSubsets(Rows,j-1),L'->apply(subsets(Columns,j+1),L->sum L-sum L')));
+    --C_0#0 = R^{-(sum Rows)}; For the Eagon Northcott, the zeroth module is in degree 0
+    C_0#0 = R^1;
+    --Then need to shift everything (like twisting the entire complex) by sum Rows.
+    --What follows works except when an entry of the splitting map is 0, i.e. as long as none of the two by two minors are zero.
+    C_0#1 = R^(apply(subsets(Columns,2),L-> -(sum L-sum Rows)));
+    Cmoddegs := apply({2,3},j-> flatten apply(multiSubsets(Rows,j-1),L'-> apply(subsets(Columns,j+1),L-> (sum L-sum L'-sum Rows))));
     
-    apply({2,3}, j-> C_0#j = R^(Cmoddegs_(j-2)));
+    apply({2,3}, j-> C_0#j = R^(-Cmoddegs_(j-2)));
     C_0#4 = 0;
     
     --Define maps for C^0
@@ -301,7 +306,7 @@ apply(4,i-> HH_i C_3 ==0)
 
 --Example where none of the complexes are virtual resolutions
 R=ZZ/32003[x_0,x_1,y_0,y_1,Degrees=>{2:{1,0},2:{0,1}}]
-phi=map(R^2,R^{4:{-1,-1}},matrix{{x_0^2,x_0*x_1,x_1^2,0},{0,y_1^2, y_0*y_1, y_0}})
+phi=map(R^2,R^{4:{-1,-1}},matrix{{x_0*y_0,x_0*y_1,-x_0*y_0,0},{0,-x_1*y_1,x_1*y_0,x_1*y_1}})
 isHomogeneous phi
 ComplexesList2(phi)
 B=intersect(ideal(x_0,x_1),ideal(y_0,y_1))
@@ -363,24 +368,19 @@ phi=map(R^2,R^{{-1,-2,0},{-2,0,-1},{0,-2,-1},{-1,0,-2}},matrix{{x_0*y_0^2,0,y_1^
 phi=map(R^2,R^{{-1,-2,0},{0,-1,-2},{-2,-1,0},{0,-2,-1}},matrix{{x_0*y_0^2,0,x_1^2*y_1,0},{0,y_0*z_0^2,0,y_1^2*z_1}})
 
 --Random matrices
-needsPackage "Depth"
-R = ZZ/32003[x_0,x_1,y_0,y_1, Degrees=>{2:{1,0},2:{0,1}}]
-phi = random(R^2,R^{4:{-2,-1}})
-isHomogeneous phi
-B= intersect(ideal(x_0,x_1),ideal(y_0,y_1))
-I = minors(2,phi)
-IB = saturate(I,B)
-depth(I,R)
-depth(IB,R)
-phi
- -- {-7942x_0^2y_0+369x_0x_1y_0+4869x_1^2y_0+2334x_0^2y_1+15514x_0x_1y_1-9803x_1^2y_1, 12308x_0^2y_0+12911x_0x_1y_0-13124x_1^2y_0-1228x_0^2y_1-5026x_0x_1y_1+3622x_1^2y_1, 6806x_0^2y_0-6858x_0x_1y_0-9466x_1^2y_0+10827x_0^2y_1-4943x_0x_1y_1+6699x_1^2y_1,  11955x_0^2y_0+14173x_0x_1y_0-13805x_1^2y_0-5617x_0^2y_1-12087x_0x_1y_1-13331x_1^2y_1},
- --  {8608x_0^2y_0+5473x_0x_1y_0+2716x_1^2y_0+700x_0^2y_1+9965x_0x_1y_1+5982x_1^2y_1, 891x_0^2y_0+14979x_0x_1y_0-5272x_1^2y_0-14379x_0^2y_1-11418x_0x_1y_1-10759x_1^2y_1,  10605x_0^2y_0-4716x_0x_1y_0-5556x_1^2y_0-2379x_0^2y_1-8399x_0x_1y_1+3520x_1^2y_1, -2701x_0^2y_0-4132x_0x_1y_0-2413x_1^2y_0-2196x_0^2y_1-15978x_0x_1y_1+8942x_1^2y_1 }
 
--- Upon reading Daniel's email, I think I  have come up with more interesting examples of homogeneous maps.
+phi=map(R^2,R^{4:{-1,-2,-1}},matrix{{random({1,2,1},R),random({1,2,1},R),random({1,2,1},R),random({1,2,1},R)},{random({1,2,1},R),random({1,2,1},R),random({1,2,1},R),random({1,2,1},R)}})
+
+
+--Examples for ComplexesList3
+
 R = ZZ/32003[x_0,x_1,y_0,y_1, Degrees => {2:{1,0},2:{0,1}}]
 phi = map(R^{{1,1},{0,0}}, R^{{2,1},{2,1},{1,2},{1,2}}, matrix{{x_0,x_1,y_0,y_1},{x_0*x_1*y_0,x_0*x_1*y_1, x_0*y_0*y_1, x_1*y_0*y_1}})
 isHomogeneous phi
 -- I think this IS a homogeneous map, but the function is stupid!
+-- Caitlyn: I think you just have to negate the degrees of the modules! Remember that R^{{-1,-1}} is R(-1,-1) which is generated in degree (1,1).
+-- The below map IS homogeneous:
+phi = map(R^{{-1,-1},{0,0}}, R^{{-2,-1},{-2,-1},{-1,-2},{-1,-2}}, matrix{{x_0,x_1,y_0,y_1},{x_0*x_1*y_0,x_0*x_1*y_1, x_0*y_0*y_1, x_1*y_0*y_1}})
+isHomogeneous phi
+
 ComplexesList3(phi)
-
-
