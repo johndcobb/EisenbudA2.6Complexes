@@ -205,6 +205,8 @@ ComplexesList2 = M -> (
 -- This function is trying to correct a mistake above about calculating the degrees.
 -- It should now work for any homogeneous 2x4 map.
 
+needsPackage "TensorComplexes"
+
 ComplexesList3 = M -> (
     I := {-1,0,1,2,3};
     apply(I, i-> C_i = new ChainComplex);
@@ -215,74 +217,66 @@ ComplexesList3 = M -> (
     Columns := degrees source M;
     
     --Define modules for C^(-1)
-    
-    C_(-1)#0 = R^(apply(subsets(Columns,1), L -> -sum L));
+    C_(-1)#0 = source M;
 
-    Cmoddegs := apply({1,2,3}, j -> ( flatten apply(multiSubsets(Rows, j), L' -> (apply(subsets(Columns, j+1), L-> sum L - sum L')))));
+    Cmoddegs := apply({1,2,3}, j -> ( flatten apply(multiSubsets(Rows, j), L' -> (apply(subsets(Columns, j+1), L-> (sum L - sum L'))))));
     apply({1,2,3}, j-> C_(-1)#j = R^(-Cmoddegs_(j-1)));
    
     C_(-1)#4 = 0;
     
-    --Define maps for C^(-1)
-    C_(-1).dd#1 = map(C_(-1)_0,C_(-1)_1,matrix{{M_(0,0), M_(0,1), M_(0,2), M_(0,3), 0, 0, 0, 0, 0, 0, 0, 0}, {M_(1,0), M_(1,1), M_(1,2), M_(1,3), M_(0,0), M_(0,1), M_(0,2), M_(0,3), 0 ,0 ,0 ,0},{0,0,0,0,M_(1,0),M_(1,1), M_(1,2),M_(1,3),M_(0,0),M_(0,1),M_(0,2),M_(0,3)},{0,0,0,0,0,0,0,0,M_(1,0),M_(1,1),M_(1,2),M_(1,3)}});
-    C_(-1).dd#2 = map(C_(-1)_1,C_(-1)_2,matrix{{-M_(0,1), -M_(0,2), -M_(0,3),0,0,0,0,0,0,0,0,0}, {M_(0,0), 0, 0, -M_(0,2), -M_(0,3), 0, 0, 0, 0, 0, 0, 0}, {0, M_(0,0), 0, M_(0,1), 0, -M_(0,3), 0,0,0,0,0,0}, {0,0, M_(0,0), 0, M_(0,1), M_(0,2),0,0,0,0,0,0}, {-M_(1,1), -M_(1,2), -M_(1,3), 0,0,0, -M_(0,1), -M_(0,2), -M_(0,3),0,0,0}, {M_(1,0), 0,0, -M_(1,2), -M_(1,3), 0, M_(0,0),0,0,-M_(0,2), -M_(0,3),0}, {0, M_(1,0), 0, M_(1,1), 0, -M_(1,3), 0, M_(0,0), 0, M_(0,1), 0, -M_(0,3)}, {0,0, M_(1,0), 0, M_(1,1), M_(1,2),0,0, M_(0,0), 0,M_(0,1), M_(0,2)}, {0,0,0,0,0,0, -M_(1,1), -M_(1,2), -M_(1,3), 0,0,0}, {0,0,0,0,0,0,M_(1,0),0,0,-M_(1,2), -M_(1,3),0}, {0,0,0,0,0,0,0,M_(1,0),0,M_(1,1),0,-M_(1,3)}, {0,0,0,0,0,0,0,0,M_(1,0),0,M_(1,1),M_(1,2)}});
-    C_(-1).dd#3 = map(C_(-1)_2,C_(-1)_3,matrix{{M_(0,2), M_(0,3), 0,0}, {-M_(0,1), 0, M_(0,3),0}, {0, -M_(0,1), -M_(0,2), 0}, {M_(0,0),0,0, M_(0,3)}, {0, M_(0,0), 0 , M_(0,2)} ,{0,0, M_(0,0), M_(0,1)} ,{M_(1,2), M_(1,3),0,0} ,{-M_(1,1), 0, M_(1,3),0} , {0,-M_(1,1), -M_(1,2), 0} ,{M_(1,0),0,0, M_(1,3)}, {0, M_(1,0), 0, M_(1,2)} ,{0,0, M_(1,0), M_(1,1)}});
+    --Define maps for C^(-1) = K(M')^*_3
+    C_(-1).dd#1 = map(C_(-1)_0,C_(-1)_1,matrix{{M_(0,1), M_(0,2), 0, M_(0,3), 0, 0, M_(1,1), M_(1,2), 0, M_(1,3), 0, 0}, {-M_(0,0), 0, M_(0,2), 0, M_(0,3), 0, -M_(1,0), 0, M_(1,2), 0, M_(1,3), 0},{0,-M_(0,0), -M_(0,1), 0, 0, M_(0,3), 0, -M_(1,0), -M_(1,1), 0, 0, M_(1,3)},{0,0,0,-M_(0,0),-M_(0,1),-M_(0,2),0,0,0,-M_(1,0),-M_(1,1),-M_(1,2)}});
+    C_(-1).dd#2 = map(C_(-1)_1,C_(-1)_2,matrix{{M_(0,2), M_(0,3), 0, 0, M_(1,2), M_(1,3), 0,0,0,0,0,0}, {-M_(0,1), 0, M_(0,3), 0, -M_(1,1), 0, M_(1,3), 0,0,0,0,0},{M_(0,0),0,0,M_(0,3),M_(1,0),0,0,M_(1,3),0,0,0,0}, {0,-M_(0,1),-M_(0,2),0,0,-M_(1,1),-M_(1,2),0,0,0,0,0},{0,M_(0,0),0,-M_(0,2),0,M_(1,0),0,-M_(1,2),0,0,0,0}, {0,0,M_(0,0), M_(0,1),0,0,M_(1,0),M_(1,1),0,0,0,0}, {0,0,0,0,-M_(0,2), -M_(0,3),0,0,M_(1,2),M_(1,3),0,0}, {0,0,0,0,M_(0,1),0,-M_(0,3),0,-M_(1,1),0,M_(1,3),0},{0,0,0,0,-M_(0,0),0,0,-M_(0,3),M_(1,0),0,0,M_(1,3)},{0,0,0,0,0,M_(0,1),M_(0,2),0,0,-M_(1,1),-M_(1,2),0}, {0,0,0,0,0,-M_(0,0), 0, M_(0,2), 0, M_(1,0), 0, -M_(1,2)}, {0,0,0,0,0,0,-M_(0,0),-M_(0,1),0,0,M_(1,0), M_(1,1)}});
+    C_(-1).dd#3 = map(C_(-1)_2,C_(-1)_3,matrix{{-M_(0,3),-M_(1,3),0,0}, {M_(0,2),M_(1,2),0,0}, {-M_(0,1),-M_(1,1),0,0}, {M_(0,0),M_(1,0),0,0}, {0,-M_(0,3),-M_(1,3),0}, {0,M_(0,2),M_(1,2),0} ,{0,-M_(0,1),-M_(1,1),0}, {0,M_(0,0),M_(1,0), 0}, {0,0, -M_(0,3), -M_(1,3)}, {0,0,M_(0,2),M_(1,2)}, {0,0,-M_(0,1),-M_(1,1)}, {0,0,M_(0,0),M_(1,0)}});
     
     --Define modules for C^0
-    --C_0#0 = R^{-(sum Rows)}; For the Eagon Northcott, the zeroth module is in degree 0
-    C_0#0 = R^1;
-    --Then need to shift everything (like twisting the entire complex) by sum Rows.
-    --What follows works except when an entry of the splitting map is 0, i.e. as long as none of the two by two minors are zero.
-    C_0#1 = R^(apply(subsets(Columns,2),L-> -(sum L-sum Rows)));
-    Cmoddegs := apply({2,3},j-> flatten apply(multiSubsets(Rows,j-1),L'-> apply(subsets(Columns,j+1),L-> (sum L-sum L'-sum Rows))));
+    C_0#0 = R^{-(sum Rows)};
+    C_0#1 = R^(apply(subsets(Columns,2),L-> -sum L));
+    Cmoddegs0 := apply({2,3},j-> flatten apply(multiSubsets(Rows,j-1),L'-> apply(subsets(Columns,j+1),L-> (sum L-sum L'))));
     
-    apply({2,3}, j-> C_0#j = R^(-Cmoddegs_(j-2)));
+    apply({2,3}, j-> C_0#j = R^(-Cmoddegs0_(j-2)));
     C_0#4 = 0;
     
-    --Define maps for C^0
-    (C_0).dd#1 = map(C_0_0,C_0_1,matrix{{M_(0,0)*M_(1,1)-M_(1,0)*M_(0,1), M_(0,0)*M_(1,2)-M_(1,0)*M_(0,2), M_(0,0)*M_(1,3)-M_(1,0)*M_(0,3), M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2), M_(0,1)*M_(1,3)-M_(1,1)*M_(0,3), M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3)}});
-    (C_0).dd#2 = map(C_0_1,C_0_2,matrix{{M_(0,2),M_(0,3),0,0,M_(1,2),M_(1,3),0,0},{-M_(0,1),0,M_(0,3),0,-M_(1,1),0,M_(1,3),0},{0,-M_(0,1),-M_(0,2),0,0,-M_(1,1),-M_(1,2),0},{M_(0,0),0,0,M_(0,3),M_(1,0),0,0,M_(1,3)},{0,M_(0,0),0,-M_(0,2),0,M_(1,0),0,-M_(1,2)},{0,0,M_(0,0),M_(0,1),0,0,M_(1,0),M_(1,1)}});
+    --Define maps for C^0 = K(M')^*_2 -> K(M')_0
+    (C_0).dd#1 = map(C_0_0,C_0_1,matrix{{M_(0,0)*M_(1,1)-M_(1,0)*M_(0,1), M_(0,0)*M_(1,2)-M_(1,0)*M_(0,2), M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2), M_(0,0)*M_(1,3)-M_(1,0)*M_(0,3), M_(0,1)*M_(1,3)-M_(1,1)*M_(0,3), M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3)}});
+    (C_0).dd#2 = map(C_0_1,C_0_2,matrix{{M_(0,2),M_(0,3),0,0,M_(1,2),M_(1,3),0,0},{-M_(0,1),0,M_(0,3),0,-M_(1,1),0,M_(1,3),0},{M_(0,0),0,0,M_(0,3),M_(1,0),0,0,M_(1,3)},{0,-M_(0,1),-M_(0,2),0,0,-M_(1,1),-M_(1,2),0},{0,M_(0,0),0,-M_(0,2),0,M_(1,0),0,-M_(1,2)},{0,0,M_(0,0),M_(0,1),0,0,M_(1,0),M_(1,1)}});
     (C_0).dd#3 = map(C_0_2,C_0_3,matrix{{-M_(0,3),-M_(1,3),0},{M_(0,2),M_(1,2),0},{-M_(0,1),-M_(1,1),0},{M_(0,0),M_(1,0),0},{0,-M_(0,3),-M_(1,3)},{0,M_(0,2),M_(1,2)},{0,-M_(0,1),-M_(1,1)},{0,M_(0,0),M_(1,0)}});
     
     --Define modules for C^1
-    --still need to do
-    C_1#0 = target M;
-    C_1#1 = source M;
-    C_1#2 = R^(apply(subsets(Columns,3), L -> sum L));
-    C_1#3 = R^(flatten apply(multiSubsets(Rows,1), L-> (apply(subsets(Columns,4), L' -> sum L - sum L'))));
+    C_1#0 = R^(apply(subsets(Rows,1), L -> -(sum L + sum Rows)));
+    C_1#1 = R^(apply(subsets(Columns,1), L -> -(sum L + sum Rows)));
+    C_1#2 = R^(apply(subsets(Columns,3), L -> -sum L));
+    C_1#3 = R^(flatten apply(multiSubsets(Rows,1), L-> (apply(subsets(Columns,4), L' -> -(sum L' - sum L)))));
     C_1#4 = 0;
     
-    --Define maps for C^1
+    --Define maps for C^1 = K(M')^*_1 -> K(M')_1
     (C_1).dd#1 = map(C_1_0,C_1_1,M);
     (C_1).dd#2 = map(C_1_1,C_1_2,matrix{{M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2), M_(0,1)*M_(1,3)-M_(1,1)*M_(0,3), M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3),0},{-M_(0,0)*M_(1,2)+M_(1,0)*M_(0,2), -M_(0,0)*M_(1,3)+M_(1,0)*M_(0,3),0,M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3)},{M_(0,0)*M_(1,1)-M_(1,0)*M_(0,1),0,-M_(0,0)*M_(1,3)+M_(1,0)*M_(0,3), -M_(0,1)*M_(1,3)+M_(1,1)*M_(0,3)},{0,M_(0,0)*M_(1,1)-M_(1,0)*M_(0,1), M_(0,0)*M_(1,2)-M_(1,0)*M_(0,2), M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2)}});
     (C_1).dd#3 = map(C_1_2,C_1_3,matrix{{-M_(0,3),-M_(1,3)},{M_(0,2),M_(1,2)},{-M_(0,1),-M_(1,1)},{M_(0,0),M_(1,0)}});
     
     --Define modules for C^2
-    --still need to do
-    
-    C_2#0 = R^(apply(multiSubsets(Rows, 2), L-> sum L));
-    C_2#1 = R^(flatten apply(multiSubsets(Rows, 1), L'-> apply(subsets(Columns,1), L-> sum L + sum L')));
-    C_2#2 = R^(apply(subsets(Columns,2), L-> sum L));
-    C_2#3 = R^{sum Columns};
+    C_2#0 = R^(apply(multiSubsets(Rows, 2), L-> -sum L));
+    C_2#1 = R^(flatten apply(multiSubsets(Rows, 1), L'-> apply(subsets(Columns,1), L-> -(sum L + sum L'))));
+    C_2#2 = R^(apply(subsets(Columns,2), L-> -sum L));
+    C_2#3 = R^{-(sum Columns-sum Rows)};
     C_2#4 = 0;
    	 
-    --Define maps for C^2
+    --Define maps for C^2 = K(M')^*_0 -> K(M')_2
     (C_2).dd#1 = map(C_2_0,C_2_1,matrix{{M_(0,0),M_(0,1),M_(0,2),M_(0,3),0,0,0,0},{M_(1,0),M_(1,1),M_(1,2),M_(1,3),M_(0,0),M_(0,1),M_(0,2),M_(0,3)},{0,0,0,0,M_(1,0),M_(1,1),M_(1,2),M_(1,3)}});
-    (C_2).dd#2 = map(C_2_1,C_2_2,matrix{{-M_(0,1),-M_(0,2),-M_(0,3),0,0,0},{M_(0,0),0,0,-M_(0,2),-M_(0,3),0},{0,M_(0,0),0,M_(0,1),0,-M_(0,3)},{0,0,M_(0,0),0,M_(0,1),M_(0,2)},{-M_(1,1),-M_(1,2),-M_(1,3),0,0,0},{M_(1,0),0,0,-M_(1,2),-M_(1,3),0},{0,M_(1,0),0,M_(1,1),0,-M_(1,3)},{0,0,M_(1,0),0,M_(1,1),M_(1,2)}});
-    (C_2).dd#3 = map(C_2_2,C_2_3,matrix{{M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3)},{-M_(0,1)*M_(1,3)+M_(1,1)*M_(0,3)},{M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2)},{M_(0,0)*M_(1,3)-M_(1,0)*M_(0,3)},{-M_(0,0)*M_(1,2)+M_(1,0)*M_(0,2)},{M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0)}});
+    (C_2).dd#2 = map(C_2_1,C_2_2,matrix{{-M_(0,1),-M_(0,2),0,-M_(0,3),0,0},{M_(0,0),0,-M_(0,2),0,-M_(0,3),0},{0,M_(0,0),M_(0,1),0,0,-M_(0,3)},{0,0,0,M_(0,0),M_(0,1),M_(0,2)},{-M_(1,1),-M_(1,2),0,-M_(1,3),0,0},{M_(1,0),0,-M_(1,2),0,-M_(1,3),0},{0,M_(1,0),M_(1,1),0,0,-M_(1,3)},{0,0,0,M_(1,0),M_(1,1),M_(1,2)}});
+    (C_2).dd#3 = map(C_2_2,C_2_3,matrix{{M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3)},{-M_(0,1)*M_(1,3)+M_(1,1)*M_(0,3)},{M_(0,0)*M_(1,3)-M_(1,0)*M_(0,3)},{M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2)},{-M_(0,0)*M_(1,2)+M_(1,0)*M_(0,2)},{M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0)}});
     
     --Define modules for C^3
-    --still need to do
-    C_3#0 = R^(apply(multiSubsets(Rows,3), L-> sum L));
-    Cmoddegs := apply({1,2},j-> flatten apply(multiSubsets(Rows,3-j), L'-> apply(subsets(Columns,j), L-> sum L + sum L')));
-    apply({1,2}, j-> C_3#j = R^(Cmoddegs_(j-1)));
-    C_3#3 = R^(apply(subsets(Columns,3), L-> sum L));
+    C_3#0 = R^(apply(multiSubsets(Rows,3), L-> -sum L));
+    Cmoddegs3 := apply({1,2},j-> flatten apply(multiSubsets(Rows,3-j), L'-> apply(subsets(Columns,j), L-> sum L + sum L')));
+    apply({1,2}, j-> C_3#j = R^(-Cmoddegs3_(j-1)));
+    C_3#3 = R^(apply(subsets(Columns,3), L-> -sum L));
     C_3#4 = 0;
     
-    --Define maps for C^3
-    (C_3).dd#1 = map(C_3_0,C_3_1,matrix{{M_(0,1), M_(0,2), M_(0,3), 0,0, 0, M_(1,1), M_(1,2), M_(1,3), 0,0,0}, {-M_(0,0), 0,0, M_(0,2), M_(0,3), 0, -M_(1,0), 0, 0, M_(1,2), M_(1,3),0}, {0, -M_(0,0), 0, -M_(0,1), 0, M_(0,3), 0, -M_(1,0), 0, -M_(1,1), 0, M_(1,3)}, {0,0, -M_(0,0), 0 ,-M_(0,1), -M_(0,2), 0,0, -M_(1,0), 0,-M_(1,1),-M_(1,2)}});
-    (C_3).dd#2 = map(C_3_1,C_3_2,matrix{{M_(0,2), M_(0,3), 0,0,M_(1,2), M_(1,3), 0,0,0,0,0,0}, {-M_(0,1), 0, M_(0,3), 0, -M_(1,1), 0, M_(1,3), 0,0,0,0,0}, {0,-M_(0,1), -M_(0,2), 0,0, -M_(1,1), -M_(1,2), 0,0,0,0,0}, {M_(0,0), 0,0,M_(0,3),M_(1,0),0,0,M_(1,3),0,0,0,0},{0, M_(0,0),0,-M_(0,2),0,M_(1,0),0,-M_(1,2),0,0,0,0}, {0,0,M_(0,0), M_(0,1),0,0,M_(1,0),M_(1,1),0,0,0,0}, {0,0,0,0,-M_(0,2), -M_(0,3),0,0,M_(1,2),M_(1,3),0,0}, {0,0,0,0,M_(0,1),0,-M_(0,3),0,-M_(1,1),0,M_(1,3),0}, {0,0,0,0,0,M_(0,1),M_(0,2),0,0,-M_(1,1),-M_(1,2),0}, {0,0,0,0,-M_(0,0),0,0,-M_(0,3),M_(1,0),0,0,M_(1,3)}, {0,0,0,0,0,-M_(0,0), 0, M_(0,2), 0, M_(1,0), 0, -M_(1,2)}, {0,0,0,0,0,0,-M_(0,0), -M_(0,1),0,0,M_(1,0), M_(1,1)}});
-    (C_3).dd#3 = map(C_3_2,C_3_3,matrix{{-M_(0,3),-M_(1,3),0,0}, {M_(0,2),M_(1,2),0,0}, {-M_(0,1),-M_(1,1),0,0}, {M_(0,0),M_(1,0),0,0}, {0,-M_(0,3),-M_(1,3),0}, {0,M_(0,2),M_(1,2),0} ,{0,-M_(0,1),-M_(1,1),0}, {0,M_(0,0),M_(1,0), 0}, {0,0, -M_(0,3), -M_(1,3)}, {0,0,M_(0,2),M_(1,2)}, {0,0,-M_(0,1),-M_(1,1)}, {0,0,M_(0,0),M_(1,0)}});
+    --Define maps for C^3 = K(M')_3
+    (C_3).dd#1 = map(C_3_0,C_3_1,matrix{{M_(0,0), M_(0,1), M_(0,2),M_(0,3), 0,0, 0, 0,0,0,0,0}, {M_(1,0),M_(1,1), M_(1,2),M_(1,3), M_(0,0), M_(0,1), M_(0,2), M_(0,3),0,0,0,0},{0,0,0,0,M_(1,0),M_(1,1),M_(1,2),M_(1,3),M_(0,0),M_(0,1),M_(0,2),M_(0,3)},{0,0,0,0,0,0,0,0,M_(1,0),M_(1,1),M_(1,2),M_(1,3)}});
+    (C_3).dd#2 = map(C_3_1,C_3_2,matrix{{-M_(0,1), -M_(0,2), 0,-M_(0,3),0,0,0,0,0,0,0,0}, {M_(0,0), 0, -M_(0,2), 0, -M_(0,3), 0, 0, 0, 0, 0, 0, 0}, {0, M_(0,0), M_(0,1), 0, 0, -M_(0,3), 0,0,0,0,0,0}, {0,0,0, M_(0,0), M_(0,1), M_(0,2),0,0,0,0,0,0}, {-M_(1,1), -M_(1,2), 0, -M_(1,3),0,0, -M_(0,1), -M_(0,2), 0,-M_(0,3),0,0}, {M_(1,0), 0, -M_(1,2), 0, -M_(1,3), 0, M_(0,0),0,-M_(0,2),0,-M_(0,3),0}, {0, M_(1,0), M_(1,1),0, 0, -M_(1,3), 0, M_(0,0), M_(0,1),0, 0, -M_(0,3)}, {0,0, 0,M_(1,0), M_(1,1), M_(1,2),0,0,0, M_(0,0),M_(0,1), M_(0,2)}, {0,0,0,0,0,0, -M_(1,1), -M_(1,2),0, -M_(1,3),0,0}, {0,0,0,0,0,0,M_(1,0),0,-M_(1,2),0, -M_(1,3),0}, {0,0,0,0,0,0,0,M_(1,0),M_(1,1),0,0,-M_(1,3)}, {0,0,0,0,0,0,0,0,0,M_(1,0),M_(1,1),M_(1,2)}});
+    (C_3).dd#3 = map(C_3_2,C_3_3,matrix{{M_(0,2), M_(0,3), 0,0}, {-M_(0,1), 0, M_(0,3),0},{M_(0,0),0,0, M_(0,3)}, {0, -M_(0,1), -M_(0,2), 0},{0, M_(0,0), 0 , M_(0,2)} ,{0,0, M_(0,0), M_(0,1)} ,{M_(1,2), M_(1,3),0,0} ,{-M_(1,1), 0, M_(1,3),0},{M_(1,0),0,0, M_(1,3)},{0,-M_(1,1),-M_(1,2), 0},{0, M_(1,0), 0, M_(1,2)} ,{0,0, M_(1,0), M_(1,1)}});
     
     return {C_(-1),C_0,C_1,C_2,C_3};)
 
@@ -375,12 +369,66 @@ phi=map(R^2,R^{4:{-1,-2,-1}},matrix{{random({1,2,1},R),random({1,2,1},R),random(
 --Examples for ComplexesList3
 
 R = ZZ/32003[x_0,x_1,y_0,y_1, Degrees => {2:{1,0},2:{0,1}}]
-phi = map(R^{{1,1},{0,0}}, R^{{2,1},{2,1},{1,2},{1,2}}, matrix{{x_0,x_1,y_0,y_1},{x_0*x_1*y_0,x_0*x_1*y_1, x_0*y_0*y_1, x_1*y_0*y_1}})
-isHomogeneous phi
--- I think this IS a homogeneous map, but the function is stupid!
--- Caitlyn: I think you just have to negate the degrees of the modules! Remember that R^{{-1,-1}} is R(-1,-1) which is generated in degree (1,1).
--- The below map IS homogeneous:
+B = intersect(ideal(x_0,x_1),ideal(y_0,y_1))
+
 phi = map(R^{{-1,-1},{0,0}}, R^{{-2,-1},{-2,-1},{-1,-2},{-1,-2}}, matrix{{x_0,x_1,y_0,y_1},{x_0*x_1*y_0,x_0*x_1*y_1, x_0*y_0*y_1, x_1*y_0*y_1}})
 isHomogeneous phi
-
 ComplexesList3(phi)
+needsPackage "Depth"
+I = minors(2,phi)
+depth(I,R)
+IB = saturate(I,B)
+depth(IB,R)
+--So, C^i are not virtual nor minimal free resolutions
+
+phi = map(R^{{-1,0},{0,0}},R^{{-2,0},{-1,-1},{-1,-1},{-2,0}},matrix{{x_0,y_0,y_1,x_1},{x_1^2,x_0*y_1,x_1*y_0,x_0^2}})
+isHomogeneous phi
+ComplexesList3(phi)
+en=eagonNorthcott(phi)
+apply({-1,0,1,2,3},i-> isHomogeneous C_i)
+apply({1,2,3},i-> isHomogeneous (C_1).dd#i)
+I = minors(2,phi)
+depth(I,R)
+IB = saturate(I,B)
+depth(IB,R)
+--So, C^i are not virtual nor minimal free resolutions    
+
+phi = map(R^{{2,0},{0,2}},R^4,matrix{{x_0^2,x_0*x_1,x_1^2,0},{0,y_0^2,y_0*y_1,y_1^2}})
+isHomogeneous phi
+ComplexesList3(phi)
+apply({-1,0,1,2,3},i-> isHomogeneous C_i)
+I = minors(2,phi)
+depth(I,R)
+IB = saturate(I,B)
+depth(IB,R)
+--So, C^i are virtual but not minimal free resolutions
+
+phi = map(R^{{-1,0},{0,-1}},R^{{-2,-1},{-1,-1},{-1,-1},{-1,-2}},matrix{{x_0*y_0,y_0,y_1,y_0^2},{x_1^2,x_0,x_1,x_1*y_1}})
+isHomogeneous phi
+ComplexesList3(phi)
+apply({-1,0,1,2,3},i-> isHomogeneous C_i)
+I = minors(2,phi)
+depth(I,R)
+IB = saturate(I,B)
+depth(IB,R)
+--So, C^i are not virtual nor minimal free resolutions
+needsPackage "VirtualResolutions"
+apply({-1,0,1,2,3},i-> isVirtual(B,C_i))
+--indeed they are not virtual
+
+phi = map(R^{{3,0},{0,3}},R^4,matrix{{x_0^3,x_0^2*x_1,x_0*x_1^2,x_1^3},{y_0^3,y_0^2*y_1,y_0*y_1^2,y_1^3}})
+isHomogeneous phi
+ComplexesList3(phi)
+apply({-1,0,1,2,3},i-> isHomogeneous C_i)
+I = minors(2,phi)
+depth(I,R)
+IB = saturate(I,B)
+depth(IB,R)
+--So, C^i are not virtual nor minimal free resolutions
+
+
+--Examples on P^1 x P^2
+
+R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,Degrees=>{2:{1,0},3:{0,1}}]
+--Goal: find homogeneous 2x4 matrices whose ideal of maximal minors has depth 1 or 2 and saturated depth 3
+
