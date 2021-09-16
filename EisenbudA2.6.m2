@@ -280,8 +280,6 @@ ComplexesList3 = M -> (
     
     return {C_(-1),C_0,C_1,C_2,C_3};)
 
-
-
 --Test example for function ComplexesList1
 R=ZZ/32003[x,y,z]
 phi=map(R^{2:1},R^4,matrix{{x,y,z,0},{0,x,y,z}})
@@ -375,10 +373,7 @@ phi=map(R^2,R^{4:{-1,-2,-1}},matrix{{random({1,2,1},R),random({1,2,1},R),random(
 -- So we hope to find a primary ideal P such that P intersect with B^n has depth 1 or 2, but P itself has depth 3.
 -- One easy way to do this is to just choose P=0. Then B has depth 2, but B saturated with itself is zero, thus has infinity depth.
 
-R = ZZ/32003[x_0,x_1,y_0,y_1, Degrees => {2:{1,0},2:{0,1}}]
-B = intersect(ideal(x_0,x_1),ideal(y_0,y_1))
-needsPackage "Depth"
-needsPackage "VirtualResolutions"
+
 
 -- So I'm going to make the first row of phi just the generators of B!
 phi = map(R^{{0,-1},{-1,0}}, R^{{-1,-2},{-1,-2},{-1,-2},{-1,-2}}, matrix{{x_0*y_0, x_0*y_1, x_1*y_0,x_1*y_1},{y_0^2, y_0*y_1, y_0*y_1, y_1^2}})
@@ -572,3 +567,6 @@ C_3
 (M_3).dd
 (C_3).dd
 --Betti numbers are different! C_3 is actually shorter than M_3
+
+apply({-1,0,1,2,3},i-> isVirtual(B,C_i))
+-- Uh oh, this says that the first and last ones are not virtual.
