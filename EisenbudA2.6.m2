@@ -121,7 +121,7 @@ ComplexesList1 = M -> (
     
     return {C_(-1),C_0,C_1,C_2,C_3};)
 
---Function for rings that are Multigraded
+--Function for rings that are Multigraded--------------------------------------------------------------------------------------------------------------------------
 --This function works for any homogeneous 2x4 map between multigraded rings where all of the entries have the same degree.
 
 needsPackage "TensorComplexes"
@@ -202,8 +202,11 @@ ComplexesList2 = M -> (
     return {C_(-1),C_0,C_1,C_2,C_3};)
 
 
--- This function is trying to correct a mistake above about calculating the degrees.
--- It should now work for any homogeneous 2x4 map.
+---------------------------------- This function is trying to correct a mistake above about calculating the degrees.-----------------------------------------------------
+---------------------------------------- It should now work for any homogeneous 2x4 map.
+
+
+------Below function has degrees fixed so that C_0#0 is S(0,0) (basically twisted every module in the complexes by sum Rows). --------------------
 
 needsPackage "TensorComplexes"
 
@@ -217,9 +220,9 @@ ComplexesList3 = M -> (
     Columns := degrees source M;
     
     --Define modules for C^(-1)
-    C_(-1)#0 = source M;
+    C_(-1)#0 = R^(apply(4, i-> -((Columns)_i- sum Rows)));
 
-    Cmoddegs := apply({1,2,3}, j -> ( flatten apply(multiSubsets(Rows, j), L' -> (apply(subsets(Columns, j+1), L-> (sum L - sum L'))))));
+    Cmoddegs := apply({1,2,3}, j -> ( flatten apply(multiSubsets(Rows, j), L' -> (apply(subsets(Columns, j+1), L-> (sum L - sum L'-sum Rows))))));
     apply({1,2,3}, j-> C_(-1)#j = R^(-Cmoddegs_(j-1)));
    
     C_(-1)#4 = 0;
@@ -230,9 +233,9 @@ ComplexesList3 = M -> (
     C_(-1).dd#3 = map(C_(-1)_2,C_(-1)_3,matrix{{-M_(0,3),-M_(1,3),0,0}, {M_(0,2),M_(1,2),0,0}, {-M_(0,1),-M_(1,1),0,0}, {M_(0,0),M_(1,0),0,0}, {0,-M_(0,3),-M_(1,3),0}, {0,M_(0,2),M_(1,2),0} ,{0,-M_(0,1),-M_(1,1),0}, {0,M_(0,0),M_(1,0), 0}, {0,0, -M_(0,3), -M_(1,3)}, {0,0,M_(0,2),M_(1,2)}, {0,0,-M_(0,1),-M_(1,1)}, {0,0,M_(0,0),M_(1,0)}});
     
     --Define modules for C^0
-    C_0#0 = R^{-(sum Rows)};
-    C_0#1 = R^(apply(subsets(Columns,2),L-> -sum L));
-    Cmoddegs0 := apply({2,3},j-> flatten apply(multiSubsets(Rows,j-1),L'-> apply(subsets(Columns,j+1),L-> (sum L-sum L'))));
+    C_0#0 = R^1;
+    C_0#1 = R^(apply(subsets(Columns,2),L-> -(sum L-sum Rows)));
+    Cmoddegs0 := apply({2,3},j-> flatten apply(multiSubsets(Rows,j-1),L'-> apply(subsets(Columns,j+1),L-> (sum L-sum L'-sum Rows))));
     
     apply({2,3}, j-> C_0#j = R^(-Cmoddegs0_(j-2)));
     C_0#4 = 0;
@@ -243,10 +246,10 @@ ComplexesList3 = M -> (
     (C_0).dd#3 = map(C_0_2,C_0_3,matrix{{-M_(0,3),-M_(1,3),0},{M_(0,2),M_(1,2),0},{-M_(0,1),-M_(1,1),0},{M_(0,0),M_(1,0),0},{0,-M_(0,3),-M_(1,3)},{0,M_(0,2),M_(1,2)},{0,-M_(0,1),-M_(1,1)},{0,M_(0,0),M_(1,0)}});
     
     --Define modules for C^1
-    C_1#0 = R^(apply(subsets(Rows,1), L -> -(sum L + sum Rows)));
-    C_1#1 = R^(apply(subsets(Columns,1), L -> -(sum L + sum Rows)));
-    C_1#2 = R^(apply(subsets(Columns,3), L -> -sum L));
-    C_1#3 = R^(flatten apply(multiSubsets(Rows,1), L-> (apply(subsets(Columns,4), L' -> -(sum L' - sum L)))));
+    C_1#0 = R^(apply(subsets(Rows,1), L -> -(sum L)));
+    C_1#1 = R^(apply(subsets(Columns,1), L -> -(sum L)));
+    C_1#2 = R^(apply(subsets(Columns,3), L -> -(sum L-sum Rows)));
+    C_1#3 = R^(flatten apply(multiSubsets(Rows,1), L-> (apply(subsets(Columns,4), L' -> -(sum L' - sum L-sum Rows)))));
     C_1#4 = 0;
     
     --Define maps for C^1 = K(M')^*_1 -> K(M')_1
@@ -255,10 +258,10 @@ ComplexesList3 = M -> (
     (C_1).dd#3 = map(C_1_2,C_1_3,matrix{{-M_(0,3),-M_(1,3)},{M_(0,2),M_(1,2)},{-M_(0,1),-M_(1,1)},{M_(0,0),M_(1,0)}});
     
     --Define modules for C^2
-    C_2#0 = R^(apply(multiSubsets(Rows, 2), L-> -sum L));
-    C_2#1 = R^(flatten apply(multiSubsets(Rows, 1), L'-> apply(subsets(Columns,1), L-> -(sum L + sum L'))));
-    C_2#2 = R^(apply(subsets(Columns,2), L-> -sum L));
-    C_2#3 = R^{-(sum Columns-sum Rows)};
+    C_2#0 = R^(apply(multiSubsets(Rows, 2), L-> -(sum L-sum Rows)));
+    C_2#1 = R^(flatten apply(multiSubsets(Rows, 1), L'-> apply(subsets(Columns,1), L-> -(sum L + sum L'-sum Rows))));
+    C_2#2 = R^(apply(subsets(Columns,2), L-> -(sum L-sum Rows)));
+    C_2#3 = R^{-(sum Columns-sum Rows-sum Rows)};
     C_2#4 = 0;
    	 
     --Define maps for C^2 = K(M')^*_0 -> K(M')_2
@@ -267,10 +270,10 @@ ComplexesList3 = M -> (
     (C_2).dd#3 = map(C_2_2,C_2_3,matrix{{M_(0,2)*M_(1,3)-M_(1,2)*M_(0,3)},{-M_(0,1)*M_(1,3)+M_(1,1)*M_(0,3)},{M_(0,0)*M_(1,3)-M_(1,0)*M_(0,3)},{M_(0,1)*M_(1,2)-M_(1,1)*M_(0,2)},{-M_(0,0)*M_(1,2)+M_(1,0)*M_(0,2)},{M_(0,0)*M_(1,1)-M_(0,1)*M_(1,0)}});
     
     --Define modules for C^3
-    C_3#0 = R^(apply(multiSubsets(Rows,3), L-> -sum L));
-    Cmoddegs3 := apply({1,2},j-> flatten apply(multiSubsets(Rows,3-j), L'-> apply(subsets(Columns,j), L-> sum L + sum L')));
+    C_3#0 = R^(apply(multiSubsets(Rows,3), L-> -(sum L-sum Rows)));
+    Cmoddegs3 := apply({1,2},j-> flatten apply(multiSubsets(Rows,3-j), L'-> apply(subsets(Columns,j), L-> (sum L + sum L'-sum Rows))));
     apply({1,2}, j-> C_3#j = R^(-Cmoddegs3_(j-1)));
-    C_3#3 = R^(apply(subsets(Columns,3), L-> -sum L));
+    C_3#3 = R^(apply(subsets(Columns,3), L-> -(sum L-sum Rows)));
     C_3#4 = 0;
     
     --Define maps for C^3 = K(M')_3
@@ -279,6 +282,8 @@ ComplexesList3 = M -> (
     (C_3).dd#3 = map(C_3_2,C_3_3,matrix{{M_(0,2), M_(0,3), 0,0}, {-M_(0,1), 0, M_(0,3),0},{M_(0,0),0,0, M_(0,3)}, {0, -M_(0,1), -M_(0,2), 0},{0, M_(0,0), 0 , M_(0,2)} ,{0,0, M_(0,0), M_(0,1)} ,{M_(1,2), M_(1,3),0,0} ,{-M_(1,1), 0, M_(1,3),0},{M_(1,0),0,0, M_(1,3)},{0,-M_(1,1),-M_(1,2), 0},{0, M_(1,0), 0, M_(1,2)} ,{0,0, M_(1,0), M_(1,1)}});
     
     return {C_(-1),C_0,C_1,C_2,C_3};)
+
+
 
 --Test example for function ComplexesList1
 R=ZZ/32003[x,y,z]
@@ -373,7 +378,10 @@ phi=map(R^2,R^{4:{-1,-2,-1}},matrix{{random({1,2,1},R),random({1,2,1},R),random(
 -- So we hope to find a primary ideal P such that P intersect with B^n has depth 1 or 2, but P itself has depth 3.
 -- One easy way to do this is to just choose P=0. Then B has depth 2, but B saturated with itself is zero, thus has infinity depth.
 
-
+R = ZZ/32003[x_0,x_1,y_0,y_1, Degrees => {2:{1,0},2:{0,1}}]
+B = intersect(ideal(x_0,x_1),ideal(y_0,y_1))
+needsPackage "Depth"
+needsPackage "VirtualResolutions"
 
 -- So I'm going to make the first row of phi just the generators of B!
 phi = map(R^{{0,-1},{-1,0}}, R^{{-1,-2},{-1,-2},{-1,-2},{-1,-2}}, matrix{{x_0*y_0, x_0*y_1, x_1*y_0,x_1*y_1},{y_0^2, y_0*y_1, y_0*y_1, y_1^2}})
@@ -406,6 +414,7 @@ IB = saturate(I,B)
 depth(IB,R)
 --So, C^i are not virtual nor minimal free resolutions    
 
+----------------------------------------------------------------------------------------
 --Example of virtual but not minimal free:
 phi = map(R^{{2,0},{0,2}},R^4,matrix{{x_0^2,x_0*x_1,x_1^2,0},{0,y_0^2,y_0*y_1,y_1^2}})
 isHomogeneous phi
@@ -416,6 +425,7 @@ depth(I,R)
 IB = saturate(I,B)
 depth(IB,R)
 --So, C^i are virtual but not minimal free resolutions
+--------------------------------------------------------------------------------------
 
 phi = map(R^{{-1,0},{0,-1}},R^{{-2,-1},{-1,-1},{-1,-1},{-1,-2}},matrix{{x_0*y_0,y_0,y_1,y_0^2},{x_1^2,x_0,x_1,x_1*y_1}})
 isHomogeneous phi
@@ -450,6 +460,7 @@ IB = saturate(I,B)
 depth(IB,R)
 --So, C^i are not virtual nor minimal free resolutions
 
+---------------------------------------------------------------------------------------------------
 --So this next very boring matrix is specifically constructed to have the ideal of maximal minors equal to the irrelevant ideal.
 phi = map(R^{{1,0},{0,1}}, R^4, matrix{{x_0,x_1,0,x_0},{0, y_0, y_1, y_0}})
 isHomogeneous phi
@@ -459,6 +470,7 @@ depth(I,R)
 IB = saturate(I,B)
 depth(IB,R)
 --So the depth of I is 1, but the saturation of I has depth infinity, as desired!
+-------------------------------------------------------------------------------------------------
 
 
 --Examples on P^1 x P^2
@@ -480,6 +492,7 @@ IB = saturate(I,B)
 depth(IB,R)
 --So, C^i are not virtual nor minimal free resolutions
 
+----------------------------------------------------------------------------------------------
 phi = map(R^{{2,0},{0,1}},R^4,matrix{{x_0^2,x_0*x_1,x_1^2,0},{0,y_0,y_1,y_2}})
 isHomogeneous phi
 ComplexesList3(phi)
@@ -499,12 +512,14 @@ C_(-1)
 (M_(-1)).dd
 (C_(-1)).dd
 --Betti numbers of virtual res are larger
---C_0 is a virtual res of the ideal I
+--C_0 is a virtual res of the ideal I (really R/I but M2 does this)
 M_0 = res I
 C_0
 (M_0).dd
 (C_0).dd
 --Betti numbers of virtual res are larger
+--Additional note: HH_1 C_0 is the only nonzero homology group, and it is annihilated by B^2.
+
 --C_1 is a virtual res of coker phi
 M_1 = res coker(phi)
 C_1
@@ -523,13 +538,30 @@ C_3
 (M_3).dd
 (C_3).dd
 --Betti numbers are different! C_3 is actually shorter than M_3 and has smaller Betti numbers
+---------------------------------------------------------------------------------------------
+
+phi = map(R^{{2,0},{0,1}},R^3,matrix{{x_0^2,x_0*x_1,x_1^2},{y_0,y_1,y_2}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 2, so C_i are virtual and free res
+F = eagonNorthcott(phi)
+M = res I
+--same Betti numbers
 
 
---Examples on P^1 x P^3
+
+--Examples on P^1 x P^3-----------------------------------------------------------------------------
 
 R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,y_3,Degrees=>{2:{1,0},4:{0,1}}]
 B=intersect(ideal(x_0,x_1),ideal(y_0,y_1,y_2,y_3))
 
+--------------------------------------------------------------------------------------------------
 phi=map(R^{{0,-1},{-3,0}},R^{4:{-3,-1}},matrix{{x_0^3,x_0^2*x_1,x_0*x_1^2,x_1^3},{y_0,y_1,y_2,y_3}})
 isHomogeneous(phi)
 ComplexesList3(phi)
@@ -537,8 +569,15 @@ I=minors(2,phi)
 depth(I,R)
 IB=saturate(I,B)
 depth(IB,R)
+primaryDecomposition I
+primaryDecomposition IB
+apply({-1,0,1,2,3},i->isVirtual(B,C_i))
 --depth of I is 2, depth of IB is 3
 --So, C^i are virtual but not minimal free resolutions
+--Interesting note:
+phi2 = map(R^{2:{1,1}},R^{{0,1},3:{1,0}},matrix{{x_0,y_0,y_1,y_2},{x_1,y_1,y_2,y_3}})
+--then IB=minors(2,phi2)
+
 --Now, compare virtual resolutions with the minimal free resolutions that they correspond to.
 --C_(-1) is a virutal res of cokernel of (C_(-1)).dd#1
 M_(-1) = res coker((C_(-1)).dd#1)
@@ -567,6 +606,187 @@ C_3
 (M_3).dd
 (C_3).dd
 --Betti numbers are different! C_3 is actually shorter than M_3
+-------------------------------------------------------------------------------------------------
 
-apply({-1,0,1,2,3},i-> isVirtual(B,C_i))
--- Uh oh, this says that the first and last ones are not virtual.
+
+
+--Examples on P^1xP^4------------------------------------------------------------------------
+R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,y_3,y_4,Degrees=>{2:{1,0},5:{0,1}}]
+B= intersect(ideal(x_0,x_1),ideal(y_0,y_1,y_2,y_3,y_4))
+
+phi = map(R^{{4,0},{0,1}},R^5,matrix{{x_0^4,x_0^3*x_1,x_0^2*x_1^2,x_0*x_1^3,x_1^4},{y_0,y_1,y_2,y_3,y_4}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+-- f-g+1=4, depth I = 2, depth IB = 4, C_i are virtual not exact
+F = eagonNorthcott phi
+M = res I
+--same Betti numbers
+
+
+
+
+--Examples on Hirzebruch surface H_2-------------------------------------------------------------------------
+R=ZZ/32003[x_0,x_1,y_0,y_1,Degrees=>{2:{1,0},{-2,1},{0,1}}]
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1))
+needsPackage "Depth"
+
+phi = map(R^{{0,-1},{-3,0}},R^{4:{-3,-1}},matrix{{x_0^3,x_0^2*x_1,x_0*x_1^2,x_1^3},{x_0^2*y_0,x_0*x_1*y_0,x_1^2*y_0,y_1}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+--both depths are 1
+
+-------------------------------------------------------------------------------------------
+phi = map(R^{{1,0},{0,1}},R^{{0,0},{2,0},{0,0},{0,0}},matrix{{x_0,0,x_1,0},{0,y_0,0,y_1}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+--C_i are virtual but not exact
+ComplexesList3(phi)
+M= res I
+M.dd
+(C_0).dd
+---------------------------------------------------------------------------------------------
+
+phi = map(R^{{1,0},{0,1}},R^4,matrix{{x_0,x_1,x_0,x_1},{x_0^2*y_0,y_1,x_1^2*y_0,y_1}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+--depth of both is 2, so C_i are not virtual nor exact
+
+phi = map(R^{{1,0},{1,1}},R^4,matrix{{x_0,x_1,x_0,x_1},{x_0^3*y_0,x_0*y_1,x_1*y_1,x_1^3*y_0}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+--depth of both is 2
+
+phi = map(R^{{4,0},{0,1}},R^{{2,0},{0,0},{2,0},{0,0}},matrix{{x_0^2,0,x_1^2,0},{y_0,y_1,y_0,y_1}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 2
+
+phi = map(R^{{4,0},{0,1}},R^{{2,0},{0,0},{2,0},{0,0}},matrix{{x_0^2,x_0^3*x_1,x_1^2,x_0*x_1^3},{y_0,y_1,y_0,y_1}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 2
+
+phi = map(R^{{1,1},{0,1}},R^{{2,0},{0,0},{0,0},{2,0}},matrix{{x_0*y_0,x_0*y_1,x_1*y_1,x_1*y_0},{y_0,0,y_1,0}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 2
+
+phi = map(R^{{4,0},{0,2}},R^{{2,0},{2,0},{2,0},{0,0}},matrix{{x_0^2,x_0*x_1,x_1^2,0},{0,x_0*x_1*y_0^2,y_0*y_1,y_1^2}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 2
+
+phi = map(R^{{4,0},{0,2}},R^{{2,0},{2,0},{2,0},{0,0}},matrix{{x_0^2,x_0*x_1,x_1^2,x_0^2*x_1^2},{y_0*y_1,x_0*x_1*y_0^2,y_0*y_1,y_1^2}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 2
+
+phi = map(R^{{4,0},{0,2}},R^{{0,0},{1,0},{2,0},{3,0}},matrix{{x_0^4,x_0^3,x_0^2,x_0},{x_1^4*y_0^2,x_1*y_0*y_1,y_0*y_1,x_1*y_0^2}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 1
+
+phi = map(R^{{3,0},{-1,1}},R^{{0,0},{1,0},{0,0}},matrix{{x_0^3,x_0*x_1,x_1^3},{x_1*y_0,0,x_1*y_0}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+--depth of both is 1 (need first to be 1 and second ot be 2)
+
+
+---Examples on P^2xP^5------------------------------------------------------------------------
+R=ZZ/32003[x_0,x_1,x_2,y_0,y_1,y_2,y_3,y_4,y_5,Degrees=>{3:{1,0},6:{0,1}}]
+B=intersect(ideal(x_0,x_1,x_2),ideal(y_0,y_1,y_2,y_3,y_4,y_5))
+
+--Graph of the embedding P^2-->P^5 of O(2)
+phi = map(R^{{2,0},{0,1}},R^6,matrix{{x_0^2,x_0*x_1,x_0*x_2,x_1^2,x_1*x_2,x_2^2},{y_0,y_1,y_2,y_3,y_4,y_5}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+-- f-g+1=5, depth I = 3, depth IB = 5, so C_i are virtual but not exact
+F = eagonNorthcott phi
+M = res I
+--Betti numbers of the EN are actually larger than those of min free res of I
+
+
+-------------------------------------------------------------------------------------------
+
+
+--Example on H_1 x P^4---------------------------------------------------------------------
+R=ZZ/32003[x_0,x_1,x_2,x_3,y_0,y_1,y_2,y_3,y_4,Degrees=>{{1,0,0},{-1,1,0},{1,0,0},{0,1,0},5:{0,0,1}}]
+B=intersect(ideal(x_0,x_2),ideal(x_1,x_3),ideal(y_0,y_1,y_2,y_3,y_4))
+
+phi = map(R^{{1,1,0},{0,0,1}},R^5,matrix{{x_0*x_3,x_2*x_3,x_0^2*x_1,x_0*x_1*x_2,x_1*x_2^2},{y_0,y_1,y_2,y_3,y_4}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+primaryDecomposition IB
+
+basis({2,1},R)
