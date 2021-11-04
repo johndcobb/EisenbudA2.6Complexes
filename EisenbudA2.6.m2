@@ -555,13 +555,102 @@ M = res I
 --same Betti numbers
 
 
+-- Examples on P^1 x P^1 x P^1 ------------------------
+
+R=ZZ/101[x_0,x_1,y_0,y_1,z_0,z_1,Degrees=>{2:{1,0,0},2:{0,1,0},2:{0,0,1}}]
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1),ideal(z_0,z_1))
+
+L = permutations {x_0*y_0*z_0, x_1*y_0*z_0, x_1*y_1*z_0, x_1*y_0*z_1, x_0*y_0*z_1, x_0*y_1*z_1, x_0*y_1*z_0, x_1*y_1*z_1}
+a=random(40320)
+
+phi=map(R^2,R^{4:{-1,-1,-1}},matrix{flatten apply(4,i-> (L_a)_i), flatten apply(4,i->(L_a)_{i+4})})
+
+isHomogeneous(phi)
+I=minors(2,phi)
+needsPackage "Depth"
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+
+for a from 0 to 40319 list (if depth(saturate(minors(2,map(R^2,R^{4:{-1,-1,-1}},matrix{flatten apply(4,i-> (L_a)_i), flatten apply(4,i->(L_a)_{i+4})})),B),R)>2 then break a; a)
+-- the above code never returned a number, so I think this means that the saturated depth is always \leq 2
+
+--map of random (1,1,1) forms
+phi=map(R^2,R^{4:{-1,-1,-1}},matrix{flatten apply(4,i->random({1,1,1},R)),flatten apply(4,i->random({1,1,1},R))})
+--this has saturated depth of 3
+
+
+-- Examples on P^1 x P^1 x P^2 ----------------------
+
+R=ZZ/32003[x_0,x_1,y_0,y_1,z_0,z_1,z_2,Degrees=>{2:{1,0,0},2:{0,1,0},3:{0,0,1}}]
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1),ideal(z_0,z_1,z_2))
+
+phi=map(R^2,R^{4:{-1,-1,-2}},matrix{{x_0*y_0*z_0^2, x_0*y_1*z_0*z_1, x_0*y_0*z_0*z_2, x_0*y_1*z_1*z_2},{x_1*y_0*z_1*z_2, x_1*y_1*z_1^2, x_1*y_0*z_0*z_1, x_1*y_1*z_2^2}})
+isHomogeneous(phi)
+I=minors(2,phi)
+needsPackage "Depth"
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+--depth of both is 1
+
+-- Example on P^1 x P^2 x P^3 -----------------------------
+
+R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,z_0,z_1,z_2,z_3,Degrees=>{2:{1,0,0},3:{0,1,0},4:{0,0,1}}]
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1,y_2),ideal(z_0,z_1,z_2,z_3))
+
+--Different entries for matrix, to be chosen randomly from this list
+L111= flatten entries gens B --degree (1,1,1)
+L102= flatten entries basis({1,0,2},R) --degree (1,0,2)
+L321= flatten entries basis({3,2,1},R) --degree (3,2,1)
+L210= flatten entries basis({2,1,0},R)
+L120= flatten entries basis({1,2,0},R)
+L110= flatten entries basis({1,1,0},R)
+L002= flatten entries basis({0,0,2},R)
+L001= flatten entries basis({0,0,1},R)
+
+--Make 2x4 matrix with random entries from list
+phi=map(R^2,R^{4:{-1,-1,-1}},matrix{flatten apply(4,i-> ((random L)_i)), flatten apply(4,i->(random L)_{i+4})})
+phi=map(R^2,R^{4:{-1,0,-2}},matrix{flatten apply(4,i-> ((random L)_i)), flatten apply(4,i->(random L)_{i+4})})
+phi=map(R^2,R^{4:{-3,-2,-1}},matrix{flatten apply(4,i-> ((random L)_i)), flatten apply(4,i->(random L)_{i+4})})
+L120'=random L120
+L210'=random L210
+L110'=random L110
+L002'=random L002
+phi=map(R^{{-2,-1,-2},{-3,-3,0}},R^{4:{-3,-3,-2}},matrix{flatten apply(4,i-> ((L120')_i)),flatten apply(4,i->(L002')_i)})
+phi=map(R^{{0,0,-1},{-1,-1,0}},R^{4:{-1,-1,-1}},matrix{flatten apply(4,i-> ((L110')_i)),flatten apply(4,i->(L001)_i)})
+phi=map(R^{{0,0,-2},{-1,-1,0}},R^{4:{-1,-1,-2}},matrix{flatten apply(4,i-> ((L110')_i)),flatten apply(4,i->(L002')_i)})
+
+isHomogeneous(phi)
+I=minors(2,phi)
+needsPackage "Depth"
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+primaryDecomposition I
+primaryDecomposition IB
+
+-- 3x4 case
+L120'=random L120
+L210'=random L210
+L002'=random L002
+phi=map(R^{{-2,-1,-2},{-1,-2,-2},{-3,-3,0}},R^{4:{-3,-3,-2}},matrix{flatten apply(4,i-> ((L120')_i)), flatten apply(4,i-> (L210')_i), flatten apply(4,i->(L002')_i)})
+phi=map(R^3,R^{4:{-1,-1,-1}},matrix{flatten apply(4,i-> ((L')_i)), flatten apply(4,i-> (L')_{i+4}), flatten apply(4,i->(L')_{i+8})})
+phi=map(R^3,R^{4:{-1,0,-2}},matrix{flatten apply(4,i-> ((L')_i)), flatten apply(4,i-> (L')_{i+4}), flatten apply(4,i->(L')_{i+8})})
+phi=map(R^3,R^{4:{-3,-2,-1}},matrix{flatten apply(4,i-> ((L')_i)), flatten apply(4,i-> (L')_{i+4}), flatten apply(4,i->(L')_{i+8})})
+
+isHomogeneous phi
+I=minors(3,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
 
 --Examples on P^1 x P^3-----------------------------------------------------------------------------
 
 R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,y_3,Degrees=>{2:{1,0},4:{0,1}}]
 B=intersect(ideal(x_0,x_1),ideal(y_0,y_1,y_2,y_3))
 
---------------------------------------------------------------------------------------------------
+---------------------------------------------------------------
 phi=map(R^{{0,-1},{-3,0}},R^{4:{-3,-1}},matrix{{x_0^3,x_0^2*x_1,x_0*x_1^2,x_1^3},{y_0,y_1,y_2,y_3}})
 isHomogeneous(phi)
 ComplexesList3(phi)
@@ -776,10 +865,13 @@ M = res I
 
 
 --Example on H_1 x P^4---------------------------------------------------------------------
+-- This is in our paper ----------------
+
+needsPackage "Depth"
 R=ZZ/32003[x_0,x_1,x_2,x_3,y_0,y_1,y_2,y_3,y_4,Degrees=>{{1,0,0},{-1,1,0},{1,0,0},{0,1,0},5:{0,0,1}}]
 B=intersect(ideal(x_0,x_2),ideal(x_1,x_3),ideal(y_0,y_1,y_2,y_3,y_4))
 
-phi = map(R^{{1,1,0},{0,0,1}},R^5,matrix{{x_0*x_3,x_2*x_3,x_0^2*x_1,x_0*x_1*x_2,x_1*x_2^2},{y_0,y_1,y_2,y_3,y_4}})
+phi = map(R^{{0,0,-1},{-1,-1,0}},R^{5:{-1,-1,-1}},matrix{{x_0*x_3,x_2*x_3,x_0^2*x_1,x_0*x_1*x_2,x_1*x_2^2},{y_0,y_1,y_2,y_3,y_4}})
 isHomogeneous phi
 I=minors(2,phi)
 depth(I,R)
@@ -788,5 +880,67 @@ depth(IB,R)
 I==IB
 primaryDecomposition I
 primaryDecomposition IB
+I=minors(1,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+
+en=eagonNorthcott phi
+en.dd
+prune HH en
 
 basis({2,1},R)
+
+
+--------- Graph of degree d > 2 Veronese ------------------------------------------------
+needsPackage "Depth"
+
+-- d=3 -----------
+R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,y_3,Degrees=>{2:{1,0},4:{0,1}}]
+B=intersect(ideal(x_0,x_1),ideal(y_0,y_1,y_2,y_3))
+phi=map(R^{{0,-1},{-3,0}},R^{4:{-3,-1}},matrix{{x_0^3,x_0^2*x_1,x_0*x_1^2,x_1^3},{y_0,y_1,y_2,y_3}})
+isHomogeneous(phi)
+ComplexesList3(phi)
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+primaryDecomposition I
+Q=oo_0
+primaryDecomposition IB
+apply({-1,0,1,2,3},i->isVirtual(B,C_i))
+--depth of I is 2, depth of IB is 3
+--So, C^i are virtual but not minimal free resolutions
+--Interesting note:
+phi2 = map(R^{2:{1,1}},R^{{0,1},3:{1,0}},matrix{{x_0,y_0,y_1,y_2},{x_1,y_1,y_2,y_3}})
+--then IB=minors(2,phi2)
+netList entries gens gb I
+netList entries gens gb IB
+netList entries gens gb Q
+
+
+
+-- d=4 ------------
+R=ZZ/32003[x_0,x_1,y_0,y_1,y_2,y_3,y_4,Degrees=>{2:{1,0},5:{0,1}}]
+B= intersect(ideal(x_0,x_1),ideal(y_0,y_1,y_2,y_3,y_4))
+
+phi = map(R^{{4,0},{0,1}},R^5,matrix{{x_0^4,x_0^3*x_1,x_0^2*x_1^2,x_0*x_1^3,x_1^4},{y_0,y_1,y_2,y_3,y_4}})
+isHomogeneous phi
+I=minors(2,phi)
+depth(I,R)
+IB=saturate(I,B)
+depth(IB,R)
+I==IB
+primaryDecomposition I
+Q=oo_0
+primaryDecomposition IB
+-- f-g+1=4, depth I = 2, depth IB = 4, C_i are virtual not exact
+F = eagonNorthcott phi
+M = res I
+--same Betti numbers
+phi2 = map(R^{2:{1,1}},R^{{0,1},4:{1,0}},matrix{{x_0,y_0,y_1,y_2,y_3},{x_1,y_1,y_2,y_3,y_4}})
+J=minors(2,phi2)
+IB==J
+netList entries gens gb I
+netList entries gens gb IB
+netList entries gens gb Q
